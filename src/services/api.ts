@@ -400,20 +400,40 @@ class HalagelApiService {
     }
   }
 
-  async enrolFace(payload: { employeeId: string; biometricVector: number[]; consentVersion: string }): Promise<boolean> {
+  async enrolFace(payload: {
+    employeeId: string;
+    biometricVector: number[];
+    consentVersion: string;
+    photoDataUrl?: string;
+  }): Promise<boolean> {
     const emps = this.getEmployeesList();
     const emp = emps.find((e) => e.employeeId === payload.employeeId);
+    const hash = 'HLG_FACE_SIG_' + Math.abs(payload.biometricVector.reduce((acc, v) => acc + v, 0)).toFixed(4);
+
     if (emp) {
       emp.faceEnrolled = true;
       emp.faceEnrolledAt = new Date().toISOString();
+      if (payload.photoDataUrl) {
+        emp.facePhotoUrl = payload.photoDataUrl;
+      }
+      emp.faceBiometricHash = hash;
       this.saveEmployeesList(emps);
 
       const currentUser = this.getCurrentUser();
       if (currentUser && currentUser.employeeId === emp.employeeId) {
         currentUser.faceEnrolled = true;
         currentUser.faceEnrolledAt = emp.faceEnrolledAt;
+        if (payload.photoDataUrl) {
+          currentUser.facePhotoUrl = payload.photoDataUrl;
+        }
+        currentUser.faceBiometricHash = hash;
         saveItem(STORAGE_KEYS.AUTH_USER, currentUser);
       }
+    }
+    if (payload.photoDataUrl) {
+      try {
+        localStorage.setItem(`halagel_face_${payload.employeeId}`, payload.photoDataUrl);
+      } catch (_e) {}
     }
     return true;
   }

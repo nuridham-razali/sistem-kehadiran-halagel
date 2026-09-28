@@ -280,6 +280,9 @@ export const EmployeeDashboard: React.FC = () => {
           onSuccess={() => {
             refreshDashboard();
           }}
+          onNavigateToFaceEnrol={() => {
+            setActiveScreen('ENROL');
+          }}
         />
       )}
     </div>

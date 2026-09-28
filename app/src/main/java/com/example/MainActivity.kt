@@ -567,6 +567,7 @@ fun HalagelEmployeeScreen(
 
   var showCameraEnrollmentModal by remember { mutableStateOf(false) }
   var showLocationPrompt by remember { mutableStateOf(false) }
+  var showFaceNotEnrolledDialog by remember { mutableStateOf(false) }
 
   val context = LocalContext.current
   val locationPermissionLauncher = rememberLauncherForActivityResult(
@@ -674,6 +675,64 @@ fun HalagelEmployeeScreen(
         dismissButton = {
           TextButton(onClick = { showLocationPrompt = false }) {
             Text("Nanti Sahaja", color = White60)
+          }
+        }
+      )
+    }
+
+    if (showFaceNotEnrolledDialog) {
+      AlertDialog(
+        onDismissRequest = { showFaceNotEnrolledDialog = false },
+        containerColor = MaterialTheme.colorScheme.surface,
+        icon = {
+          Box(
+            modifier = Modifier
+              .size(52.dp)
+              .background(Color(0xFFD97706).copy(alpha = 0.15f), CircleShape),
+            contentAlignment = Alignment.Center
+          ) {
+            Icon(Icons.Default.Face, contentDescription = null, tint = Color(0xFFF59E0B), modifier = Modifier.size(28.dp))
+          }
+        },
+        title = {
+          Text(
+            "Wajah Belum Didaftarkan!",
+            fontWeight = FontWeight.Bold,
+            fontSize = 16.sp,
+            color = Color.White,
+            textAlign = TextAlign.Center
+          )
+        },
+        text = {
+          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+              "Sistem kehadiran Halagel memerlukan templat biometrik wajah berdaftar untuk pengecaman automatik semasa clock in dan clock out.",
+              fontSize = 12.sp,
+              color = White70,
+              lineHeight = 16.sp
+            )
+            Text(
+              "Sila daftarkan wajah anda terlebih dahulu di tab 'Profil & Kamera'.",
+              fontSize = 11.sp,
+              color = HalagelLightEmerald,
+              fontWeight = FontWeight.SemiBold
+            )
+          }
+        },
+        confirmButton = {
+          Button(
+            onClick = {
+              showFaceNotEnrolledDialog = false
+              selectedTab = 2 // Tab Profil & Kamera
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = HalagelEmerald)
+          ) {
+            Text("Daftar Wajah Sekarang", fontWeight = FontWeight.Bold)
+          }
+        },
+        dismissButton = {
+          TextButton(onClick = { showFaceNotEnrolledDialog = false }) {
+            Text("Batal", color = White60)
           }
         }
       )
@@ -830,9 +889,13 @@ fun HalagelEmployeeScreen(
                 ) {
                   Button(
                     onClick = {
-                      flowType = "MASUK"
-                      flowOpen = true
-                      flowStep = 1 // PERLU BUKA MAP TERLEBIH DAHULU
+                      if (!kakitangan.wajahDidaftar) {
+                        showFaceNotEnrolledDialog = true
+                      } else {
+                        flowType = "MASUK"
+                        flowOpen = true
+                        flowStep = 1
+                      }
                     },
                     modifier = Modifier.weight(1f).height(48.dp).testTag("btn_rakam_masuk"),
                     colors = ButtonDefaults.buttonColors(containerColor = HalagelEmerald),
@@ -845,9 +908,13 @@ fun HalagelEmployeeScreen(
 
                   Button(
                     onClick = {
-                      flowType = "KELUAR"
-                      flowOpen = true
-                      flowStep = 1 // PERLU BUKA MAP TERLEBIH DAHULU
+                      if (!kakitangan.wajahDidaftar) {
+                        showFaceNotEnrolledDialog = true
+                      } else {
+                        flowType = "KELUAR"
+                        flowOpen = true
+                        flowStep = 1
+                      }
                     },
                     modifier = Modifier.weight(1f).height(48.dp).testTag("btn_rakam_keluar"),
                     colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF0F766E)),

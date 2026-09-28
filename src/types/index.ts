@@ -7,6 +7,8 @@ export interface User {
   active: boolean;
   faceEnrolled: boolean;
   faceEnrolledAt?: string | null;
+  facePhotoUrl?: string | null;
+  faceBiometricHash?: string | null;
   assignedOfficeId?: string | null;
   assignedOffice?: Office | null;
   mustChangePassword?: boolean;
